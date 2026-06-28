@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Transaction {{ transaction.reference_id[:12] }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Transaction Detail</h2>
+    <a href="{{ url_for('transactions.list_transactions') }}" class="btn btn-outline-secondary btn-sm">← Back</a>
+</div>
+
+<div class="row">
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-3">
+                    <div>
+                        <h4>${{ "{:,.2f}".format(transaction.amount|float) }} <small class="text-muted">{{ transaction.currency }}</small></h4>
+                        <span class="badge bg-secondary me-1">{{ transaction.type }}</span>
+                        <span class="badge bg-{% if transaction.status == 'completed' %}success{% elif transaction.status == 'failed' %}danger{% elif transaction.status == 'pending' %}warning text-dark{% else %}secondary{% endif %}">
+                            {{ transaction.status }}
+                        </span>
+                    </div>
+                </div>
+                <table class="table table-sm table-borderless">
+                    <tr><th class="text-muted">Reference</th><td class="font-monospace">{{ transaction.reference_id }}</td></tr>
+                    <tr><th class="text-muted">Date</th><td>{{ transaction.created_at.strftime('%Y-%m-%d %H:%M UTC') if transaction.created_at else '' }}</td></tr>
+                    {% if transaction.processed_at %}<tr><th class="text-muted">Processed</th><td>{{ transaction.processed_at.strftime('%Y-%m-%d %H:%M UTC') }}</td></tr>{% endif %}
+                    {% if transaction.fee and transaction.fee|float > 0 %}<tr><th class="text-muted">Fee</th><td>${{ "{:.2f}".format(transaction.fee|float) }}</td></tr>{% endif %}
+                    {% if transaction.description %}<tr><th class="text-muted">Description</th><td>{{ transaction.description }}</td></tr>{% endif %}
+                    {% if transaction.recipient_name %}<tr><th class="text-muted">Recipient</th><td>{{ transaction.recipient_name }}</td></tr>{% endif %}
+                    {% if transaction.recipient_bank %}<tr><th class="text-muted">Bank</th><td>{{ transaction.recipient_bank }}</td></tr>{% endif %}
+                </table>
+                {% if transaction.note %}
+                <div class="alert alert-light mt-3">
+                    <strong>Note:</strong> {{ transaction.note | safe }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h6>Actions</h6>
+                {% if transaction.status in ['completed'] %}
+                <a href="{{ url_for('transactions.dispute_transaction', tx_id=transaction.id) }}" class="btn btn-outline-warning w-100">File Dispute</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}{{ stock.ticker }} – {{ stock.name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2>{{ stock.ticker }} <small class="text-muted fs-5">{{ stock.name }}</small></h2>
+        <p class="text-muted mb-0">{{ stock.exchange }} &bull; {{ stock.sector }}</p>
+    </div>
+    <div>
+        <form method="post" action="{% if in_watchlist %}{{ url_for('trading.remove_from_watchlist') }}{% else %}{{ url_for('trading.add_to_watchlist') }}{% endif %}" class="d-inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="ticker" value="{{ stock.ticker }}">
+            <button class="btn btn-sm {% if in_watchlist %}btn-outline-danger{% else %}btn-outline-secondary{% endif %} me-2">
+                <i class="fas fa-star me-1"></i>{% if in_watchlist %}Remove{% else %}Watch{% endif %}
+            </button>
+        </form>
+        <a href="{{ url_for('trading.place_trade') }}" class="btn btn-success">Trade</a>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <p class="text-muted small mb-1">Price</p>
+            <h3>${{ "{:.2f}".format(stock.current_price|float) }}</h3>
+            <span class="{% if stock.change_pct >= 0 %}text-success{% else %}text-danger{% endif %}">
+                {{ "{:+.2f}".format(stock.change_pct) }}%
+            </span>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <p class="text-muted small mb-1">Day High/Low</p>
+            <p class="mb-0">${{ "{:.2f}".format(stock.day_high|float) if stock.day_high else '—' }} / ${{ "{:.2f}".format(stock.day_low|float) if stock.day_low else '—' }}</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <p class="text-muted small mb-1">52W High/Low</p>
+            <p class="mb-0">${{ "{:.2f}".format(stock.week_52_high|float) if stock.week_52_high else '—' }} / ${{ "{:.2f}".format(stock.week_52_low|float) if stock.week_52_low else '—' }}</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <p class="text-muted small mb-1">P/E Ratio</p>
+            <h5>{{ "{:.1f}".format(stock.pe_ratio|float) if stock.pe_ratio else 'N/A' }}</h5>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm mb-3">
+    <div class="card-header bg-white"><h5 class="mb-0">Price History (90 days)</h5></div>
+    <div class="card-body">
+        <canvas id="priceChart" height="100"></canvas>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+const labels = [{% for p in prices %}"{{ p.recorded_at.strftime('%m/%d') if p.recorded_at else '' }}",{% endfor %}].reverse();
+const data = [{% for p in prices %}{{ p.close_price|float }},{% endfor %}].reverse();
+new Chart(document.getElementById('priceChart'), {
+    type: 'line',
+    data: { labels, datasets: [{ label: '{{ stock.ticker }}', data, borderColor: '#198754', fill: false, tension: 0.1 }] },
+    options: { plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => '$' + v.toFixed(2) } } } }
+});
+</script>
+{% endblock %}

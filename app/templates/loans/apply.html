@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Apply for Loan{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <h2 class="mb-4">Loan Application</h2>
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <form method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                        <label class="form-label">Loan Type</label>
+                        <select name="type" class="form-select" required>
+                            {% for lt in loan_types %}<option value="{{ lt }}">{{ lt.replace('_',' ').title() }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Purpose</label>
+                        <input type="text" name="purpose" class="form-control" placeholder="What is this loan for?">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Loan Amount</label>
+                        <div class="input-group"><span class="input-group-text">$</span><input type="number" name="amount" class="form-control" min="500" max="500000" step="100" required></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Term</label>
+                        <select name="term_months" class="form-select">
+                            {% for t in [6,12,24,36,48,60,84,120,180,240,360] %}<option value="{{ t }}">{{ t }} months ({{ (t//12) }}yr{% if t%12 %} {{ t%12 }}mo{% endif %})</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Employment Status</label>
+                        <select name="employment_status" class="form-select">
+                            <option value="employed">Employed</option>
+                            <option value="self_employed">Self-Employed</option>
+                            <option value="unemployed">Unemployed</option>
+                            <option value="retired">Retired</option>
+                            <option value="student">Student</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Annual Income</label>
+                        <div class="input-group"><span class="input-group-text">$</span><input type="number" name="annual_income" class="form-control" step="1000"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Credit Score (optional)</label>
+                        <input type="number" name="credit_score" class="form-control" min="300" max="850">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Collateral (if applicable)</label>
+                        <textarea name="collateral_description" class="form-control" rows="2"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100 btn-lg">Submit Application</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

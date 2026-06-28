@@ -1,0 +1,206 @@
+:root {
+    --juice-green: #198754;
+    --juice-green-light: #d1e7dd;
+    --juice-dark: #1a472a;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-color: #f8f9fa;
+}
+
+.navbar-brand {
+    font-size: 1.4rem;
+    letter-spacing: -0.5px;
+}
+
+.card {
+    border-radius: 12px;
+    transition: box-shadow 0.2s ease;
+}
+
+.card:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important;
+}
+
+.btn {
+    border-radius: 8px;
+}
+
+.btn-success {
+    background-color: var(--juice-green);
+    border-color: var(--juice-green);
+}
+
+.btn-success:hover {
+    background-color: var(--juice-dark);
+    border-color: var(--juice-dark);
+}
+
+.badge {
+    font-weight: 500;
+}
+
+.list-group-item {
+    border-left: none;
+    border-right: none;
+}
+
+.list-group-item:first-child {
+    border-top: none;
+}
+
+.list-group-item:last-child {
+    border-bottom: none;
+}
+
+.font-monospace {
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.letter-spacing-wide {
+    letter-spacing: 0.3em;
+    font-size: 1.5rem;
+}
+
+.progress {
+    border-radius: 20px;
+}
+
+.progress-bar {
+    border-radius: 20px;
+}
+
+.table th {
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.navbar .nav-link {
+    font-size: 0.92rem;
+    padding: 0.5rem 0.8rem;
+}
+
+.card-header {
+    border-radius: 12px 12px 0 0 !important;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    padding: 1rem 1.25rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--juice-green);
+    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.15);
+}
+
+.alert {
+    border-radius: 10px;
+    border: none;
+}
+
+.sidebar-link {
+    display: block;
+    padding: 0.5rem 1rem;
+    color: #495057;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background 0.15s;
+}
+
+.sidebar-link:hover {
+    background: var(--juice-green-light);
+    color: var(--juice-dark);
+}
+
+.sidebar-link.active {
+    background: var(--juice-green-light);
+    color: var(--juice-dark);
+    font-weight: 600;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, #198754, #20c997);
+    color: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+}
+
+.account-card {
+    background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+    color: white;
+    border-radius: 16px;
+}
+
+.ticker-badge {
+    background: #f1f3f5;
+    color: #212529;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.price-up { color: #198754; }
+.price-down { color: #dc3545; }
+
+.chart-container {
+    position: relative;
+    min-height: 200px;
+}
+
+footer {
+    margin-top: auto;
+}
+
+.notification-dot {
+    width: 8px;
+    height: 8px;
+    background: #dc3545;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1rem;
+    }
+    h2 { font-size: 1.5rem; }
+}
+
+.admin-sidebar {
+    background: #212529;
+    min-height: 100vh;
+    padding: 1rem;
+}
+
+.admin-sidebar a {
+    color: #adb5bd;
+    display: block;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    text-decoration: none;
+    margin-bottom: 2px;
+}
+
+.admin-sidebar a:hover {
+    background: #343a40;
+    color: white;
+}
+
+.balance-display {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #198754;
+    letter-spacing: -1px;
+}
+
+.transaction-row-income td:last-child { color: #198754; }
+.transaction-row-expense td:last-child { color: #dc3545; }
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    opacity: 1;
+}

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Place Trade{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <h2 class="mb-4">Place Order</h2>
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <form method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                        <label class="form-label">Portfolio</label>
+                        <select name="portfolio_id" class="form-select" required>
+                            {% for p in portfolios %}
+                            <option value="{{ p.id }}">{{ p.name }} (Cash: ${{ "{:,.2f}".format(p.cash_balance|float) }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Symbol</label>
+                        <input type="text" name="ticker" class="form-control text-uppercase" list="stockList" required placeholder="AAPL">
+                        <datalist id="stockList">
+                            {% for s in stocks %}<option value="{{ s.ticker }}">{{ s.name }}</option>{% endfor %}
+                        </datalist>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Side</label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="side" id="buy" value="buy" checked>
+                            <label class="btn btn-outline-success" for="buy">Buy</label>
+                            <input type="radio" class="btn-check" name="side" id="sell" value="sell">
+                            <label class="btn btn-outline-danger" for="sell">Sell</label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Order Type</label>
+                        <select name="order_type" class="form-select" id="orderType">
+                            <option value="market">Market Order</option>
+                            <option value="limit">Limit Order</option>
+                        </select>
+                    </div>
+                    <div class="mb-3" id="limitPriceField" style="display:none">
+                        <label class="form-label">Limit Price</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" name="limit_price" class="form-control" step="0.0001" min="0.0001">
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Quantity</label>
+                        <input type="number" name="quantity" class="form-control" step="0.0001" min="0.0001" required placeholder="0">
+                    </div>
+                    <button type="submit" class="btn btn-success w-100 btn-lg">Place Order</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('orderType').addEventListener('change', function() {
+    document.getElementById('limitPriceField').style.display = this.value === 'limit' ? 'block' : 'none';
+});
+</script>
+{% endblock %}

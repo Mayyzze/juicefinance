@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Loan {{ loan.loan_number }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>{{ loan.type.title() }} Loan</h2>
+    <span class="badge bg-{% if loan.status == 'active' %}success{% elif loan.status == 'paid_off' %}secondary{% elif loan.status == 'rejected' %}danger{% else %}warning text-dark{% endif %} fs-6">{{ loan.status.replace('_',' ').title() }}</span>
+</div>
+<div class="row">
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body">
+                <table class="table table-sm table-borderless">
+                    <tr><th class="text-muted">Loan Number</th><td class="font-monospace">{{ loan.loan_number }}</td></tr>
+                    <tr><th class="text-muted">Purpose</th><td>{{ loan.purpose or '—' }}</td></tr>
+                    <tr><th class="text-muted">Principal</th><td>${{ "{:,.2f}".format(loan.principal|float) }}</td></tr>
+                    <tr><th class="text-muted">Outstanding Balance</th><td class="fw-bold">${{ "{:,.2f}".format(loan.outstanding_balance|float) }}</td></tr>
+                    <tr><th class="text-muted">Interest Rate</th><td>{{ "{:.2f}".format(loan.interest_rate|float * 100) }}% APR</td></tr>
+                    <tr><th class="text-muted">Monthly Payment</th><td>${{ "{:,.2f}".format(loan.monthly_payment|float) if loan.monthly_payment else '—' }}</td></tr>
+                    <tr><th class="text-muted">Term</th><td>{{ loan.term_months }} months</td></tr>
+                    <tr><th class="text-muted">Origination Date</th><td>{{ loan.origination_date.strftime('%Y-%m-%d') if loan.origination_date else '—' }}</td></tr>
+                    <tr><th class="text-muted">Maturity Date</th><td>{{ loan.maturity_date.strftime('%Y-%m-%d') if loan.maturity_date else '—' }}</td></tr>
+                    <tr><th class="text-muted">Next Payment</th><td>{{ loan.next_payment_date.strftime('%Y-%m-%d') if loan.next_payment_date else '—' }}</td></tr>
+                </table>
+                <div class="progress mb-2" style="height:10px">
+                    <div class="progress-bar bg-success" style="width:{{ loan.progress_pct|int }}%"></div>
+                </div>
+                <small class="text-muted">{{ "{:.1f}".format(loan.progress_pct) }}% paid off (${{ "{:,.2f}".format(loan.total_paid) }} of ${{ "{:,.2f}".format(loan.principal|float) }})</small>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-header bg-white d-flex justify-content-between">
+                <h5 class="mb-0">Documents</h5>
+                <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#uploadModal">Upload</button>
+            </div>
+            {% if documents %}
+            <div class="list-group list-group-flush">
+                {% for doc in documents %}
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                    <div><i class="fas fa-file me-2"></i>{{ doc.original_filename }}<br><small class="text-muted">{{ doc.document_type }} &bull; {{ doc.uploaded_at.strftime('%Y-%m-%d') if doc.uploaded_at else '' }}</small></div>
+                    <a href="{{ url_for('loans.download_document', doc_id=doc.id) }}" class="btn btn-sm btn-outline-secondary">Download</a>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="card-body text-center text-muted py-3">No documents uploaded.</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        {% if loan.status == 'active' %}
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-header bg-white"><h5 class="mb-0">Make Payment</h5></div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('loans.make_payment', loan_id=loan.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3"><label class="form-label">From Account</label>
+                        <select name="account_id" class="form-select" required>
+                            {% for acct in accounts %}<option value="{{ acct.id }}">{{ acct.nickname or acct.type_name }} (${{ "{:,.2f}".format(acct.balance|float) }})</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3"><label class="form-label">Amount</label>
+                        <div class="input-group"><span class="input-group-text">$</span><input type="number" name="amount" class="form-control" value="{{ loan.monthly_payment|float if loan.monthly_payment else '' }}" step="0.01" min="0.01" required></div>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">Make Payment</button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white"><h5 class="mb-0">Payment History</h5></div>
+            {% if payments %}
+            <div class="list-group list-group-flush">
+                {% for p in payments[:10] %}
+                <div class="list-group-item d-flex justify-content-between small">
+                    <span>{{ p.payment_date.strftime('%Y-%m-%d') if p.payment_date else '' }}</span>
+                    <span>${{ "{:,.2f}".format(p.amount|float) }}</span>
+                    <span class="badge bg-success">{{ p.status }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="card-body text-center text-muted">No payments yet.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="uploadModal" tabindex="-1">
+    <div class="modal-dialog"><div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title">Upload Document</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+            <form method="post" action="{{ url_for('loans.upload_document', loan_id=loan.id) }}" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="mb-3"><label class="form-label">Document Type</label>
+                    <select name="document_type" class="form-select">
+                        <option value="income_proof">Proof of Income</option>
+                        <option value="id">Government ID</option>
+                        <option value="bank_statement">Bank Statement</option>
+                        <option value="tax_return">Tax Return</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="mb-3"><label class="form-label">File</label><input type="file" name="document" class="form-control" required></div>
+                <button type="submit" class="btn btn-success w-100">Upload</button>
+            </form>
+        </div>
+    </div></div>
+</div>
+{% endblock %}

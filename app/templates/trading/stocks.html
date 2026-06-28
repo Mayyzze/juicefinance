@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Stocks{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Markets</h2>
+    <a href="{{ url_for('trading.price_alerts') }}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-bell me-1"></i>Alerts</a>
+</div>
+<form method="get" class="row g-2 mb-4">
+    <div class="col-md-5"><input type="text" name="q" class="form-control" placeholder="Search ticker or name..." value="{{ query }}"></div>
+    <div class="col-md-3">
+        <select name="sector" class="form-select">
+            <option value="">All Sectors</option>
+            {% for s in sectors %}<option value="{{ s[0] }}">{{ s[0] }}</option>{% endfor %}
+        </select>
+    </div>
+    <div class="col-md-2"><button class="btn btn-outline-success w-100">Search</button></div>
+</form>
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light"><tr><th>Ticker</th><th>Company</th><th>Sector</th><th class="text-end">Price</th><th class="text-end">Change</th><th class="text-end">Market Cap</th></tr></thead>
+            <tbody>
+                {% for s in stocks %}
+                <tr>
+                    <td><a href="{{ url_for('trading.stock_detail', ticker=s.ticker) }}" class="fw-bold text-decoration-none">{{ s.ticker }}</a></td>
+                    <td>{{ s.name }}</td>
+                    <td><small class="text-muted">{{ s.sector }}</small></td>
+                    <td class="text-end">${{ "{:,.2f}".format(s.current_price|float) }}</td>
+                    <td class="text-end {% if s.change_pct >= 0 %}text-success{% else %}text-danger{% endif %}">{{ "{:+.2f}".format(s.change_pct) }}%</td>
+                    <td class="text-end"><small class="text-muted">${{ "{:,.0f}".format(s.market_cap / 1e9) if s.market_cap else '—' }}B</small></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Import Transactions{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h2 class="mb-4">Import Transactions</h2>
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <form method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-4">
+                        <label class="form-label">Upload File</label>
+                        <input type="file" name="file" class="form-control" accept=".xml,.csv" required>
+                        <div class="form-text">Supported formats: XML, CSV</div>
+                    </div>
+                    <div class="alert alert-secondary small">
+                        <strong>XML format:</strong><br>
+                        <code>&lt;transactions&gt;<br>&nbsp;&lt;transaction&gt;<br>&nbsp;&nbsp;&lt;amount&gt;100.00&lt;/amount&gt;<br>&nbsp;&nbsp;&lt;description&gt;...&lt;/description&gt;<br>&nbsp;&nbsp;&lt;date&gt;2024-01-15&lt;/date&gt;<br>&nbsp;&lt;/transaction&gt;<br>&lt;/transactions&gt;</code>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">Import</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Send Money{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <h2 class="mb-4">Send Money</h2>
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <form method="post" id="transferForm">
+                    <div class="mb-3">
+                        <label class="form-label">From Account</label>
+                        <select name="source_account_id" class="form-select" required>
+                            {% for account in accounts %}
+                            <option value="{{ account.id }}">{{ account.nickname or account.type_name }} ({{ account.display_number }}) – ${{ "{:,.2f}".format(account.balance|float) }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Transfer To</label>
+                        <div class="btn-group w-100 mb-3" role="group">
+                            <input type="radio" class="btn-check" name="destination_type" id="dest_internal" value="internal" checked>
+                            <label class="btn btn-outline-success" for="dest_internal">My Account</label>
+                            <input type="radio" class="btn-check" name="destination_type" id="dest_user" value="user">
+                            <label class="btn btn-outline-success" for="dest_user">Another User</label>
+                            <input type="radio" class="btn-check" name="destination_type" id="dest_wire" value="wire">
+                            <label class="btn btn-outline-success" for="dest_wire">Wire Transfer</label>
+                        </div>
+                    </div>
+
+                    <div id="section_internal">
+                        <div class="mb-3">
+                            <label class="form-label">To Account</label>
+                            <select name="destination_account_id" class="form-select">
+                                {% for account in accounts %}
+                                <option value="{{ account.id }}">{{ account.nickname or account.type_name }} ({{ account.display_number }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="section_user" style="display:none">
+                        <div class="mb-3">
+                            <label class="form-label">Recipient Username or Email</label>
+                            <input type="text" name="recipient" class="form-control" placeholder="@username or email@example.com">
+                        </div>
+                    </div>
+
+                    <div id="section_wire" style="display:none">
+                        <div class="mb-3">
+                            <label class="form-label">Recipient Name</label>
+                            <input type="text" name="recipient_name" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Bank Name</label>
+                            <input type="text" name="recipient_bank" class="form-control">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Account Number</label>
+                                <input type="text" name="recipient_account" class="form-control">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Routing Number</label>
+                                <input type="text" name="recipient_routing" class="form-control">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">IBAN (international)</label>
+                            <input type="text" name="recipient_iban" class="form-control" placeholder="GB29NWBK60161331926819">
+                        </div>
+                        <div class="alert alert-info small">Wire transfers include a $25.00 fee and process in 1-3 business days.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Amount</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" name="amount" class="form-control" min="0.01" step="0.01" required placeholder="0.00">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <input type="text" name="description" class="form-control" placeholder="What's this for?">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Note (private)</label>
+                        <textarea name="note" class="form-control" rows="2"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Schedule for later (optional)</label>
+                        <input type="date" name="schedule_date" class="form-control">
+                    </div>
+                    <button type="submit" class="btn btn-success w-100 btn-lg">Send Money</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.querySelectorAll('input[name="destination_type"]').forEach(r => {
+    r.addEventListener('change', function() {
+        document.getElementById('section_internal').style.display = 'none';
+        document.getElementById('section_user').style.display = 'none';
+        document.getElementById('section_wire').style.display = 'none';
+        document.getElementById('section_' + this.value).style.display = 'block';
+    });
+});
+</script>
+{% endblock %}

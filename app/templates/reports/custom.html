@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Custom Report{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <h2 class="mb-4">Custom Report</h2>
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <form method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3"><label class="form-label">Report Title</label><input type="text" name="title" class="form-control" value="My Financial Report" required></div>
+                    <div class="mb-3"><label class="form-label">Accounts</label>
+                        {% for acct in accounts %}
+                        <div class="form-check"><input type="checkbox" name="account_ids" value="{{ acct.id }}" class="form-check-input" checked><label class="form-check-label">{{ acct.nickname or acct.type_name }} ({{ acct.display_number }})</label></div>
+                        {% endfor %}
+                    </div>
+                    <div class="row">
+                        <div class="col mb-3"><label class="form-label">From</label><input type="date" name="start_date" class="form-control"></div>
+                        <div class="col mb-3"><label class="form-label">To</label><input type="date" name="end_date" class="form-control"></div>
+                    </div>
+                    <div class="mb-4 form-check"><input type="checkbox" name="include_charts" class="form-check-input" checked><label class="form-check-label">Include charts</label></div>
+                    <button type="submit" class="btn btn-success w-100">Generate PDF</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

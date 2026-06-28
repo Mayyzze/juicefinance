@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Linked Accounts{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Linked External Accounts</h2>
+</div>
+<div class="row">
+    <div class="col-lg-7">
+        {% for la in linked_accounts %}
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <h6>{{ la.institution_name }}</h6>
+                    <p class="text-muted small mb-0">{{ la.account_type }} ending in {{ la.account_number_last4 }}
+                    {% if la.is_verified %}<span class="badge bg-success ms-2">Verified</span>{% else %}<span class="badge bg-warning text-dark ms-2">Pending</span>{% endif %}
+                    </p>
+                </div>
+                <div>
+                    {% if not la.is_verified %}
+                    <button class="btn btn-sm btn-outline-success me-2" data-bs-toggle="modal" data-bs-target="#verifyModal{{ la.id }}">Verify</button>
+                    {% endif %}
+                    <form method="post" action="{{ url_for('accounts.remove_linked', linked_id=la.id) }}" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="btn btn-sm btn-outline-danger">Remove</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="verifyModal{{ la.id }}" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header"><h5 class="modal-title">Verify Account</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                    <div class="modal-body">
+                        <p class="text-muted small">Enter the two micro-deposit amounts (e.g. $0.13 and $0.47)</p>
+                        <form method="post" action="{{ url_for('accounts.verify_linked', linked_id=la.id) }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <div class="row">
+                                <div class="col"><input type="text" name="amount1" class="form-control" placeholder="$0.00"></div>
+                                <div class="col"><input type="text" name="amount2" class="form-control" placeholder="$0.00"></div>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100 mt-3">Verify</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <p class="text-muted">No linked external accounts.</p>
+        {% endfor %}
+    </div>
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white"><h5 class="mb-0">Link a New Account</h5></div>
+            <div class="card-body">
+                <form method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                        <label class="form-label">Bank Name</label>
+                        <input type="text" name="institution_name" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Account Number</label>
+                        <input type="text" name="account_number" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Routing Number</label>
+                        <input type="text" name="routing_number" class="form-control" maxlength="9">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Account Type</label>
+                        <select name="account_type" class="form-select">
+                            <option value="checking">Checking</option>
+                            <option value="savings">Savings</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">Link Account</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Sign In{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5 col-lg-4">
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-body p-4">
+                <h4 class="text-center mb-4"><i class="fas fa-leaf text-success me-2"></i>Sign In</h4>
+                <form method="post" action="{{ url_for('auth.login', next=next) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="email" class="form-control" required autofocus>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input type="password" name="password" class="form-control" required>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" name="remember_me" class="form-check-input" id="remember">
+                        <label class="form-check-label" for="remember">Remember me</label>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">Sign In</button>
+                </form>
+                <hr>
+                <div class="text-center">
+                    <a href="{{ url_for('auth.reset_request') }}" class="text-muted small">Forgot password?</a>
+                    &nbsp;|&nbsp;
+                    <a href="{{ url_for('auth.register') }}" class="text-success small">Create account</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

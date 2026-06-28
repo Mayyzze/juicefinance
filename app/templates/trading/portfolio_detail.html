@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}{{ portfolio.name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>{{ portfolio.name }}</h2>
+    <a href="{{ url_for('trading.place_trade') }}" class="btn btn-success">Trade</a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <p class="text-muted small mb-1">Cash</p>
+            <h4>${{ "{:,.2f}".format(portfolio.cash_balance|float) }}</h4>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <p class="text-muted small mb-1">Holdings</p>
+            <h4>${{ "{:,.2f}".format(portfolio.total_value - portfolio.cash_balance|float) }}</h4>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <p class="text-muted small mb-1">Total Value</p>
+            <h4 class="text-success">${{ "{:,.2f}".format(portfolio.total_value) }}</h4>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white"><h5 class="mb-0">Holdings</h5></div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr><th>Stock</th><th>Qty</th><th>Avg Cost</th><th>Current Price</th><th>Value</th><th>P&L</th></tr>
+            </thead>
+            <tbody>
+                {% for h in holdings %}
+                <tr>
+                    <td><a href="{{ url_for('trading.stock_detail', ticker=h.stock.ticker) }}" class="fw-bold text-decoration-none">{{ h.stock.ticker }}</a><br><small class="text-muted">{{ h.stock.name }}</small></td>
+                    <td>{{ "{:.4f}".format(h.quantity|float) }}</td>
+                    <td>${{ "{:.2f}".format(h.avg_cost|float) }}</td>
+                    <td>${{ "{:.2f}".format(h.stock.current_price|float) }}</td>
+                    <td>${{ "{:,.2f}".format(h.current_value) }}</td>
+                    <td class="{% if h.pnl >= 0 %}text-success{% else %}text-danger{% endif %}">
+                        {{ "{:+.2f}".format(h.pnl) }} ({{ "{:+.1f}".format(h.pnl_pct) }}%)
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" class="text-center text-muted py-4">No holdings. <a href="{{ url_for('trading.place_trade') }}">Place a trade</a></td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white"><h5 class="mb-0">Recent Trades</h5></div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr><th>Date</th><th>Ticker</th><th>Side</th><th>Qty</th><th>Price</th><th>Total</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+                {% for t in recent_trades %}
+                <tr>
+                    <td><small>{{ t.created_at.strftime('%Y-%m-%d') if t.created_at else '' }}</small></td>
+                    <td><strong>{{ t.stock.ticker }}</strong></td>
+                    <td><span class="badge bg-{% if t.side == 'buy' %}success{% else %}danger{% endif %}">{{ t.side.upper() }}</span></td>
+                    <td>{{ "{:.4f}".format(t.quantity|float) }}</td>
+                    <td>${{ "{:.2f}".format(t.executed_price|float) if t.executed_price else '—' }}</td>
+                    <td>${{ "{:,.2f}".format(t.total_amount|float) if t.total_amount else '—' }}</td>
+                    <td><span class="badge bg-secondary">{{ t.status }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Reports{% endblock %}
+{% block content %}
+<h2 class="mb-4">Reports & Exports</h2>
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white"><h5 class="mb-0">Account Statement</h5></div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('reports.generate') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="report_type" value="statement">
+                    <div class="mb-3"><label class="form-label">Account</label>
+                        <select name="account_id" class="form-select" required>
+                            {% for acct in accounts %}<option value="{{ acct.id }}">{{ acct.nickname or acct.type_name }} ({{ acct.display_number }})</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col mb-3"><label class="form-label">From</label><input type="date" name="start_date" class="form-control"></div>
+                        <div class="col mb-3"><label class="form-label">To</label><input type="date" name="end_date" class="form-control"></div>
+                    </div>
+                    <div class="mb-3"><label class="form-label">Format</label>
+                        <select name="format" class="form-select">
+                            <option value="pdf">PDF</option>
+                            <option value="csv">CSV</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">Generate</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-header bg-white"><h5 class="mb-0">Tax Summary</h5></div>
+            <div class="card-body">
+                <form method="get" action="{{ url_for('reports.tax_summary') }}">
+                    <div class="mb-3"><label class="form-label">Tax Year</label>
+                        <select name="year" class="form-select">
+                            {% for y in [2024,2023,2022] %}<option value="{{ y }}">{{ y }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-outline-success w-100">View Tax Summary</button>
+                </form>
+            </div>
+        </div>
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white"><h5 class="mb-0">Custom Report</h5></div>
+            <div class="card-body">
+                <a href="{{ url_for('reports.custom_report') }}" class="btn btn-outline-secondary w-100">Create Custom Report</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Admin – Announcements{% endblock %}
+{% block content %}
+<h2 class="mb-4">System Announcements</h2>
+<div class="row">
+    <div class="col-lg-7">
+        {% for ann in announcements %}
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-1">
+                    <h6>{{ ann.title }}</h6>
+                    <span class="badge bg-{% if ann.is_active %}success{% else %}secondary{% endif %}">{% if ann.is_active %}Active{% else %}Inactive{% endif %}</span>
+                </div>
+                <p class="text-muted small">{{ ann.body }}</p>
+                <form method="post" action="{{ url_for('admin.toggle_announcement', ann_id=ann.id) }}" class="d-inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn btn-sm btn-outline-secondary">Toggle</button>
+                </form>
+            </div>
+        </div>
+        {% else %}
+        <p class="text-muted">No announcements.</p>
+        {% endfor %}
+    </div>
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white"><h5 class="mb-0">Create Announcement</h5></div>
+            <div class="card-body">
+                <form method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3"><label class="form-label">Title</label><input type="text" name="title" class="form-control" required></div>
+                    <div class="mb-3"><label class="form-label">Body</label><textarea name="body" class="form-control" rows="3" required></textarea></div>
+                    <div class="mb-3"><label class="form-label">Type</label>
+                        <select name="type" class="form-select">
+                            <option value="info">Info</option>
+                            <option value="warning">Warning</option>
+                            <option value="danger">Alert</option>
+                            <option value="success">Success</option>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col mb-3"><label class="form-label">Starts</label><input type="datetime-local" name="starts_at" class="form-control"></div>
+                        <div class="col mb-3"><label class="form-label">Ends</label><input type="datetime-local" name="ends_at" class="form-control"></div>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">Create</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Price Alerts{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Price Alerts</h2>
+</div>
+<div class="row">
+    <div class="col-lg-7">
+        {% if alerts %}
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light"><tr><th>Stock</th><th>Condition</th><th>Target</th><th>Status</th><th></th></tr></thead>
+                    <tbody>
+                        {% for a in alerts %}
+                        <tr>
+                            <td><strong>{{ a.stock.ticker }}</strong></td>
+                            <td>{{ a.condition }}</td>
+                            <td>${{ "{:.2f}".format(a.target_price|float) }}</td>
+                            <td>{% if a.triggered %}<span class="badge bg-success">Triggered</span>{% else %}<span class="badge bg-secondary">Active</span>{% endif %}</td>
+                            <td>
+                                <form method="post" action="{{ url_for('trading.delete_alert', alert_id=a.id) }}">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button class="btn btn-sm btn-outline-danger">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% else %}
+        <p class="text-muted">No price alerts set.</p>
+        {% endif %}
+    </div>
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white"><h5 class="mb-0">Create Alert</h5></div>
+            <div class="card-body">
+                <form method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3"><label class="form-label">Ticker</label>
+                        <input type="text" name="ticker" class="form-control text-uppercase" list="stockList" required>
+                        <datalist id="stockList">{% for s in stocks %}<option value="{{ s.ticker }}">{% endfor %}</datalist>
+                    </div>
+                    <div class="mb-3"><label class="form-label">Condition</label>
+                        <select name="condition" class="form-select">
+                            <option value="above">Price goes above</option>
+                            <option value="below">Price drops below</option>
+                        </select>
+                    </div>
+                    <div class="mb-3"><label class="form-label">Target Price</label>
+                        <div class="input-group"><span class="input-group-text">$</span><input type="number" name="target_price" class="form-control" step="0.01" required></div>
+                    </div>
+                    <div class="mb-3 form-check"><input type="checkbox" name="notify_email" class="form-check-input" checked> <label class="form-check-label">Email notification</label></div>
+                    <button type="submit" class="btn btn-success w-100">Create Alert</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

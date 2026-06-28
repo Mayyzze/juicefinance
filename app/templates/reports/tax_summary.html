@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Tax Summary {{ year }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Tax Summary {{ year }}</h2>
+    <a href="{{ url_for('reports.index') }}" class="btn btn-outline-secondary btn-sm">← Reports</a>
+</div>
+<div class="row g-3 mb-4">
+    <div class="col-md-4"><div class="card border-0 shadow-sm text-center p-3"><p class="text-muted small mb-1">Total Income</p><h4 class="text-success">${{ "{:,.2f}".format(income) }}</h4></div></div>
+    <div class="col-md-4"><div class="card border-0 shadow-sm text-center p-3"><p class="text-muted small mb-1">Total Expenses</p><h4 class="text-danger">${{ "{:,.2f}".format(expenses) }}</h4></div></div>
+    <div class="col-md-4"><div class="card border-0 shadow-sm text-center p-3"><p class="text-muted small mb-1">Fees Paid</p><h4>${{ "{:,.2f}".format(fees) }}</h4></div></div>
+</div>
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white d-flex justify-content-between">
+        <h5 class="mb-0">All {{ year }} Transactions</h5>
+        <small class="text-muted">{{ transactions|length }} transactions</small>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-sm table-hover mb-0">
+            <thead class="table-light"><tr><th>Date</th><th>Type</th><th>Description</th><th class="text-end">Amount</th></tr></thead>
+            <tbody>
+                {% for tx in transactions %}
+                <tr>
+                    <td><small>{{ tx.created_at.strftime('%Y-%m-%d') if tx.created_at else '' }}</small></td>
+                    <td>{{ tx.type }}</td>
+                    <td>{{ tx.description or '—' }}</td>
+                    <td class="text-end {% if tx.recipient_id == current_user.id %}text-success{% else %}text-danger{% endif %}">${{ "{:,.2f}".format(tx.amount|float) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

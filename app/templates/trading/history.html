@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Trade History{% endblock %}
+{% block content %}
+<h2 class="mb-4">Trade History</h2>
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light"><tr><th>Date</th><th>Ticker</th><th>Side</th><th>Type</th><th>Qty</th><th>Price</th><th>Total</th><th>Commission</th><th>Status</th></tr></thead>
+            <tbody>
+                {% for t in trades.items %}
+                <tr>
+                    <td><small>{{ t.created_at.strftime('%Y-%m-%d') if t.created_at else '' }}</small></td>
+                    <td><strong>{{ t.stock.ticker }}</strong></td>
+                    <td><span class="badge bg-{% if t.side == 'buy' %}success{% else %}danger{% endif %}">{{ t.side.upper() }}</span></td>
+                    <td>{{ t.order_type }}</td>
+                    <td>{{ "{:.4f}".format(t.quantity|float) }}</td>
+                    <td>${{ "{:.2f}".format(t.executed_price|float) if t.executed_price else '—' }}</td>
+                    <td>${{ "{:,.2f}".format(t.total_amount|float) if t.total_amount else '—' }}</td>
+                    <td>${{ "{:.2f}".format(t.commission|float) }}</td>
+                    <td><span class="badge bg-secondary">{{ t.status }}</span></td>
+                </tr>
+                {% else %}
+                <tr><td colspan="9" class="text-center text-muted py-4">No trades yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if trades.has_prev or trades.has_next %}
+    <div class="card-footer bg-white d-flex justify-content-between">
+        <a href="{{ url_for('trading.trade_history', page=trades.prev_num) }}" class="btn btn-sm btn-outline-secondary {% if not trades.has_prev %}disabled{% endif %}">Previous</a>
+        <a href="{{ url_for('trading.trade_history', page=trades.next_num) }}" class="btn btn-sm btn-outline-secondary {% if not trades.has_next %}disabled{% endif %}">Next</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

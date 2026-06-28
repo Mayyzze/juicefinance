@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Set New Password{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5 col-lg-4">
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-body p-4">
+                <h4 class="text-center mb-4">Set New Password</h4>
+                <form method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                        <label class="form-label">New Password</label>
+                        <input type="password" name="password" class="form-control" required minlength="6">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Confirm Password</label>
+                        <input type="password" name="confirm_password" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">Update Password</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

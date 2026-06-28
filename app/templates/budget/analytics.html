@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Analytics{% endblock %}
+{% block content %}
+<h2 class="mb-4">Spending Analytics</h2>
+<div class="row">
+    <div class="col-lg-8 mb-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white"><h5 class="mb-0">Income vs Expenses (6 months)</h5></div>
+            <div class="card-body"><canvas id="monthlyChart" height="120"></canvas></div>
+        </div>
+    </div>
+    <div class="col-lg-4 mb-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white"><h5 class="mb-0">Spending by Category</h5></div>
+            <div class="card-body"><canvas id="categoryChart"></canvas></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+const monthlyLabels = [{% for m in months_data %}"{{ m.month }}/{{ m.year }}",{% endfor %}];
+const incomeData = [{% for m in months_data %}{{ m.income }},{% endfor %}];
+const expenseData = [{% for m in months_data %}{{ m.expenses }},{% endfor %}];
+new Chart(document.getElementById('monthlyChart'), {
+    type: 'bar',
+    data: { labels: monthlyLabels, datasets: [
+        { label: 'Income', data: incomeData, backgroundColor: '#198754' },
+        { label: 'Expenses', data: expenseData, backgroundColor: '#dc3545' }
+    ]},
+    options: { responsive: true }
+});
+
+const catLabels = [{% for c in cat_spending %}"{{ c.name }}",{% endfor %}];
+const catData = [{% for c in cat_spending %}{{ c.total }},{% endfor %}];
+const catColors = [{% for c in cat_spending %}"{{ c.color }}",{% endfor %}];
+new Chart(document.getElementById('categoryChart'), {
+    type: 'doughnut',
+    data: { labels: catLabels, datasets: [{ data: catData, backgroundColor: catColors }] },
+    options: { responsive: true }
+});
+</script>
+{% endblock %}

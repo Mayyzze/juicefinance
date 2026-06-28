@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Notifications{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Notifications</h2>
+    <form method="post" action="{{ url_for('notifications.mark_all_read') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-sm btn-outline-secondary">Mark All Read</button>
+    </form>
+</div>
+{% if notifications.items %}
+<div class="card border-0 shadow-sm">
+    <div class="list-group list-group-flush">
+        {% for n in notifications.items %}
+        <div class="list-group-item px-4 py-3 {% if not n.is_read %}bg-light{% endif %}">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <i class="fas fa-{{ n.icon }} text-{{ n.type }} me-2"></i>
+                    <strong>{{ n.title }}</strong>
+                    {% if not n.is_read %}<span class="badge bg-primary ms-2">New</span>{% endif %}
+                    <br>
+                    <span class="text-muted">{{ n.body }}</span>
+                    {% if n.link %}<br><a href="{{ n.link }}" class="small">View details →</a>{% endif %}
+                </div>
+                <small class="text-muted ms-3 text-nowrap">{{ n.created_at.strftime('%b %d %H:%M') if n.created_at else '' }}</small>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% if notifications.has_prev or notifications.has_next %}
+<div class="d-flex justify-content-between mt-3">
+    <a href="{{ url_for('notifications.list_notifications', page=notifications.prev_num) }}" class="btn btn-sm btn-outline-secondary {% if not notifications.has_prev %}disabled{% endif %}">Previous</a>
+    <a href="{{ url_for('notifications.list_notifications', page=notifications.next_num) }}" class="btn btn-sm btn-outline-secondary {% if not notifications.has_next %}disabled{% endif %}">Next</a>
+</div>
+{% endif %}
+{% else %}
+<div class="text-center py-5 text-muted"><i class="fas fa-bell fa-2x mb-3"></i><p>No notifications.</p></div>
+{% endif %}
+{% endblock %}

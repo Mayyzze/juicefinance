@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}My Accounts{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>My Accounts</h2>
+    <a href="{{ url_for('accounts.new_account') }}" class="btn btn-success"><i class="fas fa-plus me-2"></i>New Account</a>
+</div>
+
+<div class="row g-3 mb-4">
+    {% for account in accounts %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card border-0 shadow-sm h-100 {% if account.is_frozen %}border border-warning{% endif %}">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <h5 class="card-title mb-0">{{ account.nickname or account.type_name }}</h5>
+                        <small class="text-muted">{{ account.display_number }}</small>
+                    </div>
+                    <div>
+                        {% if account.is_primary %}<span class="badge bg-success me-1">Primary</span>{% endif %}
+                        {% if account.is_frozen %}<span class="badge bg-warning text-dark">Frozen</span>{% endif %}
+                        {% if not account.is_active %}<span class="badge bg-secondary">Closed</span>{% endif %}
+                    </div>
+                </div>
+                <h3 class="text-success">${{ "{:,.2f}".format(account.balance|float) }}</h3>
+                <p class="text-muted small mb-3">{{ account.currency }} &bull; {{ account.type_name }}</p>
+                <a href="{{ url_for('accounts.account_detail', account_id=account.id) }}" class="btn btn-outline-success btn-sm">View Details</a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center py-5 text-muted">
+        <i class="fas fa-university fa-3x mb-3"></i>
+        <p>No accounts yet. <a href="{{ url_for('accounts.new_account') }}">Open your first account</a></p>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Linked External Accounts</h5>
+        <a href="{{ url_for('accounts.linked_accounts') }}" class="btn btn-sm btn-outline-secondary">Manage</a>
+    </div>
+</div>
+{% endblock %}

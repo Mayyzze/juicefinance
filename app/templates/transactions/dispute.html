@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}File Dispute{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h2 class="mb-4">File a Dispute</h2>
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body">
+                <p class="text-muted small">Transaction: <strong>{{ transaction.reference_id }}</strong></p>
+                <p class="text-muted small">Amount: <strong>${{ "{:,.2f}".format(transaction.amount|float) }}</strong></p>
+            </div>
+        </div>
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <form method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                        <label class="form-label">Reason</label>
+                        <select name="reason" class="form-select" required>
+                            <option value="unauthorized">Unauthorized transaction</option>
+                            <option value="duplicate">Duplicate charge</option>
+                            <option value="wrong_amount">Incorrect amount</option>
+                            <option value="no_service">Service not received</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Description</label>
+                        <textarea name="description" class="form-control" rows="4" required placeholder="Please describe the issue in detail..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-warning w-100">Submit Dispute</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

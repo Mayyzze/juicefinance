@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Admin – Loans{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Loan Applications</h2>
+    <div class="btn-group btn-group-sm">
+        {% for s in ['pending','under_review','active','paid_off','rejected'] %}
+        <a href="{{ url_for('admin.loans', status=s) }}" class="btn btn-{% if status_filter == s %}success{% else %}outline-secondary{% endif %}">{{ s.replace('_',' ').title() }}</a>
+        {% endfor %}
+    </div>
+</div>
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light"><tr><th>Loan#</th><th>User</th><th>Type</th><th>Amount</th><th>Rate</th><th>Status</th><th>Applied</th><th></th></tr></thead>
+            <tbody>
+                {% for loan in loans.items %}
+                <tr>
+                    <td><code class="small">{{ loan.loan_number }}</code></td>
+                    <td><a href="{{ url_for('admin.user_detail', user_id=loan.user_id) }}">{{ loan.borrower.username if loan.borrower else loan.user_id }}</a></td>
+                    <td>{{ loan.type }}</td>
+                    <td>${{ "{:,.2f}".format(loan.principal|float) }}</td>
+                    <td>{{ "{:.2f}".format(loan.interest_rate|float * 100) }}%</td>
+                    <td><span class="badge bg-{% if loan.status == 'active' %}success{% elif loan.status == 'pending' %}warning text-dark{% else %}secondary{% endif %}">{{ loan.status }}</span></td>
+                    <td><small>{{ loan.created_at.strftime('%Y-%m-%d') if loan.created_at else '' }}</small></td>
+                    <td>
+                        {% if loan.status == 'pending' %}
+                        <form method="post" action="{{ url_for('admin.approve_loan', loan_id=loan.id) }}" class="d-inline"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-sm btn-success">Approve</button></form>
+                        <button class="btn btn-sm btn-danger ms-1" data-bs-toggle="modal" data-bs-target="#rejectModal{{ loan.id }}">Reject</button>
+                        {% endif %}
+                    </td>
+                </tr>
+                <div class="modal fade" id="rejectModal{{ loan.id }}" tabindex="-1">
+                    <div class="modal-dialog"><div class="modal-content">
+                        <div class="modal-header"><h5 class="modal-title">Reject Loan</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+                        <div class="modal-body">
+                            <form method="post" action="{{ url_for('admin.reject_loan', loan_id=loan.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <div class="mb-3"><label class="form-label">Rejection Reason</label><textarea name="reason" class="form-control" rows="3" required></textarea></div>
+                                <button type="submit" class="btn btn-danger w-100">Confirm Rejection</button>
+                            </form>
+                        </div>
+                    </div></div>
+                </div>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

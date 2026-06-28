@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}500 Server Error{% endblock %}
+{% block content %}
+<div class="text-center py-5">
+    <h1 class="display-1 text-danger">500</h1>
+    <h3>Internal Server Error</h3>
+    <p class="text-muted">Something went wrong on our end.</p>
+    <pre class="text-start bg-light p-3 small">{{ error }}</pre>
+    <a href="{{ url_for('main.dashboard') }}" class="btn btn-success">Go Home</a>
+</div>
+{% endblock %}

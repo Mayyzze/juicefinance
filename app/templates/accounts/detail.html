@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Account {{ account.display_number }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2>{{ account.nickname or account.type_name }}</h2>
+        <p class="text-muted mb-0">{{ account.account_number }} &bull; {{ account.currency }}</p>
+    </div>
+    <div>
+        <form method="post" action="{{ url_for('accounts.freeze_account', account_id=account.id) }}" class="d-inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-sm btn-outline-warning">{% if account.is_frozen %}Unfreeze{% else %}Freeze{% endif %}</button>
+        </form>
+        <form method="post" action="{{ url_for('accounts.generate_statement', account_id=account.id) }}" class="d-inline ms-2">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="start_date" value="">
+            <input type="hidden" name="end_date" value="">
+            <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-file-pdf me-1"></i>Statement</button>
+        </form>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <p class="text-muted small mb-1">Balance</p>
+            <h3 class="text-success">${{ "{:,.2f}".format(account.balance|float) }}</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <p class="text-muted small mb-1">Account Type</p>
+            <h5>{{ account.type_name }}</h5>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <p class="text-muted small mb-1">Routing Number</p>
+            <h5 class="font-monospace">{{ account.routing_number }}</h5>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <p class="text-muted small mb-1">Opened</p>
+            <h5>{{ account.created_at.strftime('%b %Y') if account.created_at else 'N/A' }}</h5>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Transaction History</h5>
+        <a href="{{ url_for('transactions.transfer') }}" class="btn btn-sm btn-success"><i class="fas fa-paper-plane me-1"></i>Send</a>
+    </div>
+    <div class="card-body p-0">
+        {% if transactions.items %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Date</th>
+                        <th>Description</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th class="text-end">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tx in transactions.items %}
+                    <tr>
+                        <td><small>{{ tx.created_at.strftime('%Y-%m-%d') if tx.created_at else '' }}</small></td>
+                        <td><a href="{{ url_for('transactions.transaction_detail', tx_id=tx.id) }}" class="text-decoration-none">{{ tx.description or tx.reference_id[:16] }}</a></td>
+                        <td><span class="badge bg-secondary">{{ tx.type }}</span></td>
+                        <td><span class="badge bg-{% if tx.status == 'completed' %}success{% elif tx.status == 'failed' %}danger{% elif tx.status == 'pending' %}warning text-dark{% else %}secondary{% endif %}">{{ tx.status }}</span></td>
+                        <td class="text-end fw-semibold {% if tx.destination_account_id == account.id %}text-success{% else %}text-danger{% endif %}">
+                            {% if tx.destination_account_id == account.id %}+{% else %}-{% endif %}${{ "{:,.2f}".format(tx.amount|float) }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if transactions.has_prev or transactions.has_next %}
+        <div class="card-footer bg-white d-flex justify-content-between align-items-center">
+            <a href="{{ url_for('accounts.account_detail', account_id=account.id, page=transactions.prev_num) }}" class="btn btn-sm btn-outline-secondary {% if not transactions.has_prev %}disabled{% endif %}">Previous</a>
+            <span class="text-muted small">Page {{ transactions.page }} of {{ transactions.pages }}</span>
+            <a href="{{ url_for('accounts.account_detail', account_id=account.id, page=transactions.next_num) }}" class="btn btn-sm btn-outline-secondary {% if not transactions.has_next %}disabled{% endif %}">Next</a>
+        </div>
+        {% endif %}
+        {% else %}
+        <div class="text-center py-5 text-muted">
+            <i class="fas fa-receipt fa-2x mb-3"></i>
+            <p>No transactions on this account.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

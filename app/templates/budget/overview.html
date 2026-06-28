@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Budget{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Budget Overview</h2>
+    <div>
+        <a href="{{ url_for('budget.categories') }}" class="btn btn-outline-secondary btn-sm me-2">Categories</a>
+        <a href="{{ url_for('budget.analytics') }}" class="btn btn-outline-success btn-sm">Analytics</a>
+    </div>
+</div>
+<form method="get" class="row g-2 mb-4">
+    <div class="col-auto"><select name="month" class="form-select form-select-sm">{% for m in range(1,13) %}<option value="{{ m }}" {% if m == month %}selected{% endif %}>{{ ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m-1] }}</option>{% endfor %}</select></div>
+    <div class="col-auto"><select name="year" class="form-select form-select-sm">{% for y in range(2022, 2026) %}<option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>{% endfor %}</select></div>
+    <div class="col-auto"><button class="btn btn-sm btn-outline-success">Filter</button></div>
+</form>
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <p class="text-muted small mb-1">Income</p>
+            <h4 class="text-success">+${{ "{:,.2f}".format(total_income) }}</h4>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <p class="text-muted small mb-1">Expenses</p>
+            <h4 class="text-danger">-${{ "{:,.2f}".format(total_expenses) }}</h4>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <p class="text-muted small mb-1">Net</p>
+            <h4 class="{% if total_income - total_expenses >= 0 %}text-success{% else %}text-danger{% endif %}">${{ "{:,.2f}".format(total_income - total_expenses) }}</h4>
+        </div>
+    </div>
+</div>
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white"><h5 class="mb-0">Spending by Category</h5></div>
+    <div class="list-group list-group-flush">
+        {% for cat in categories %}
+        {% set spent = spending.get(cat.id, 0) %}
+        {% if spent > 0 or cat.monthly_budget %}
+        <div class="list-group-item px-4 py-3">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <span><i class="fas fa-{{ cat.icon }} me-2" style="color:{{ cat.color }}"></i>{{ cat.name }}</span>
+                <span>
+                    <strong>${{ "{:,.2f}".format(spent) }}</strong>
+                    {% if cat.monthly_budget %}
+                    <small class="text-muted"> / ${{ "{:,.2f}".format(cat.monthly_budget|float) }}</small>
+                    {% endif %}
+                </span>
+            </div>
+            {% if cat.monthly_budget and cat.monthly_budget|float > 0 %}
+            {% set pct = [100, (spent / cat.monthly_budget|float * 100)|int]|min %}
+            <div class="progress" style="height:6px">
+                <div class="progress-bar {% if pct > 90 %}bg-danger{% elif pct > 70 %}bg-warning{% else %}bg-success{% endif %}" style="width:{{ pct }}%"></div>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

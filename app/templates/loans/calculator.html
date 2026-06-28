@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Loan Calculator{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <h2 class="mb-4">Loan Calculator</h2>
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body p-4">
+                <div class="mb-3"><label class="form-label">Loan Amount</label><div class="input-group"><span class="input-group-text">$</span><input type="number" id="principal" class="form-control" value="10000" step="100"></div></div>
+                <div class="mb-3"><label class="form-label">Annual Interest Rate (%)</label><input type="number" id="rate" class="form-control" value="9.9" step="0.1"></div>
+                <div class="mb-4"><label class="form-label">Term (months)</label><input type="number" id="term" class="form-control" value="36"></div>
+                <button onclick="calculate()" class="btn btn-success w-100">Calculate</button>
+            </div>
+        </div>
+        <div class="card border-0 shadow-sm" id="results" style="display:none">
+            <div class="card-body p-4 text-center">
+                <h5 class="text-muted">Monthly Payment</h5>
+                <h2 class="text-success" id="monthly"></h2>
+                <hr>
+                <div class="row"><div class="col"><p class="text-muted small">Total Repayment</p><strong id="total"></strong></div><div class="col"><p class="text-muted small">Total Interest</p><strong id="interest"></strong></div></div>
+            </div>
+        </div>
+        <div class="text-center mt-3">
+            <a href="{{ url_for('loans.apply') }}" class="btn btn-outline-success">Apply Now</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+async function calculate() {
+    const r = await fetch('/loans/api/calculate', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({principal:+document.getElementById('principal').value,rate:+document.getElementById('rate').value,term_months:+document.getElementById('term').value})});
+    const d = await r.json();
+    document.getElementById('monthly').textContent = '$' + d.monthly_payment.toFixed(2);
+    document.getElementById('total').textContent = '$' + d.total_repayment.toFixed(2);
+    document.getElementById('interest').textContent = '$' + d.total_interest.toFixed(2);
+    document.getElementById('results').style.display = 'block';
+}
+</script>
+{% endblock %}

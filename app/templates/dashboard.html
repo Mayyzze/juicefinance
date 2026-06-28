@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+
+{% for ann in announcements %}
+<div class="alert alert-{{ ann.type }} alert-dismissible" role="alert">
+    <strong>{{ ann.title }}</strong> {{ ann.body }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endfor %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Welcome back, {{ current_user.first_name }}!</h2>
+    <span class="text-muted small">{{ now().strftime('%A, %B %d, %Y') if now else '' }}</span>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <p class="card-text opacity-75 mb-1">Total Balance</p>
+                        <h3 class="fw-bold">${{ "{:,.2f}".format(total_balance) }}</h3>
+                    </div>
+                    <i class="fas fa-wallet fa-2x opacity-50 align-self-center"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <p class="card-text text-muted mb-1">Monthly Income</p>
+                        <h3 class="fw-bold text-success">+${{ "{:,.2f}".format(monthly_income) }}</h3>
+                    </div>
+                    <i class="fas fa-arrow-down fa-2x text-success opacity-50 align-self-center"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <p class="card-text text-muted mb-1">Monthly Expenses</p>
+                        <h3 class="fw-bold text-danger">-${{ "{:,.2f}".format(monthly_expenses) }}</h3>
+                    </div>
+                    <i class="fas fa-arrow-up fa-2x text-danger opacity-50 align-self-center"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-7 mb-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Recent Transactions</h5>
+                <a href="{{ url_for('transactions.list_transactions') }}" class="btn btn-sm btn-outline-success">View All</a>
+            </div>
+            <div class="card-body p-0">
+                {% if recent_transactions %}
+                <div class="list-group list-group-flush">
+                    {% for tx in recent_transactions %}
+                    <a href="{{ url_for('transactions.transaction_detail', tx_id=tx.id) }}" class="list-group-item list-group-item-action px-4 py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="badge bg-secondary me-2">{{ tx.type }}</span>
+                                <small class="text-muted">{{ tx.description or tx.reference_id[:12] }}</small>
+                            </div>
+                            <div class="text-end">
+                                <span class="fw-semibold {% if tx.recipient_id == current_user.id %}text-success{% else %}text-danger{% endif %}">
+                                    {% if tx.recipient_id == current_user.id %}+{% else %}-{% endif %}${{ "{:,.2f}".format(tx.amount|float) }}
+                                </span>
+                                <br><small class="text-muted">{{ tx.created_at.strftime('%b %d') if tx.created_at else '' }}</small>
+                            </div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="fas fa-receipt fa-2x mb-3"></i>
+                    <p>No transactions yet. <a href="{{ url_for('transactions.transfer') }}">Make your first transfer</a></p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5 mb-4">
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">My Accounts</h5>
+                <a href="{{ url_for('accounts.new_account') }}" class="btn btn-sm btn-outline-success">+ Add</a>
+            </div>
+            <div class="card-body p-0">
+                {% if accounts %}
+                {% for account in accounts %}
+                <a href="{{ url_for('accounts.account_detail', account_id=account.id) }}" class="list-group-item list-group-item-action px-4 py-3 d-flex justify-content-between">
+                    <div>
+                        <strong>{{ account.nickname or account.type_name }}</strong>
+                        <br><small class="text-muted">{{ account.display_number }}</small>
+                    </div>
+                    <div class="text-end">
+                        <strong>${{ "{:,.2f}".format(account.balance|float) }}</strong>
+                        <br><small class="text-muted">{{ account.currency }}</small>
+                    </div>
+                </a>
+                {% endfor %}
+                {% else %}
+                <div class="text-center py-4 text-muted">
+                    <p><a href="{{ url_for('accounts.new_account') }}">Open your first account</a></p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('transactions.transfer') }}" class="btn btn-success"><i class="fas fa-paper-plane me-2"></i>Send Money</a>
+                    <a href="{{ url_for('trading.place_trade') }}" class="btn btn-outline-success"><i class="fas fa-chart-bar me-2"></i>Trade</a>
+                    <a href="{{ url_for('loans.apply') }}" class="btn btn-outline-secondary"><i class="fas fa-hand-holding-usd me-2"></i>Apply for Loan</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

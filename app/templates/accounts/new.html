@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Open New Account{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h4 class="mb-4">Open New Account</h4>
+                <form method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                        <label class="form-label">Account Type</label>
+                        <select name="account_type_id" class="form-select" required>
+                            {% for at in account_types %}
+                            <option value="{{ at.id }}">{{ at.name }} – {{ at.description or '' }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nickname (optional)</label>
+                        <input type="text" name="nickname" class="form-control" placeholder="e.g. Vacation Fund">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Currency</label>
+                        <select name="currency" class="form-select">
+                            {% for cur in ['USD','EUR','GBP','JPY','CHF','CAD'] %}
+                            <option value="{{ cur }}">{{ cur }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">Open Account</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
